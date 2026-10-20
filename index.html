@@ -138,7 +138,7 @@ const it={id:++id,n,p,s,u:/كجم|كيلو|kg/i.test(g(cu))?"kg":"pc",na:/^(لا
 if(!m.has(s))m.set(s,[]);m.get(s).push(it)});
 if(!m.size)throw new Error("empty");
 S=[...m].map(([t,items],i)=>({i,t,items}));ALL=S.flatMap(s=>s.items);tabs()}
-async function init(){if(SHEET_URL){try{const c=new AbortController(),tm=setTimeout(()=>c.abort(),7000);const res=await fetch(SHEET_URL+(SHEET_URL.includes("?")?"&":"?")+"t="+Date.now(),{signal:c.signal});clearTimeout(tm);if(!res.ok)throw new Error("http");const t=await res.text();parseSheet(t);try{localStorage.setItem("menuCache",t)}catch(e){}}catch(e){try{const t=localStorage.getItem("menuCache");if(t)parseSheet(t)}catch(e2){}}}render()}
+let st="";async function init(){if(SHEET_URL){try{const c=new AbortController(),tm=setTimeout(()=>c.abort(),7000);const res=await fetch(SHEET_URL+(SHEET_URL.includes("?")?"&":"?")+"t="+Date.now(),{signal:c.signal,cache:"no-store"});clearTimeout(tm);if(!res.ok)throw new Error("http");const t=await res.text();parseSheet(t);st="✓ الأسعار محدّثة من الشيت";try{localStorage.setItem("menuCache",t)}catch(e){}}catch(e){console.error("sheet error",e);st="⚠ تعذر الاتصال بالشيت: "+e;try{const t=localStorage.getItem("menuCache");if(t)parseSheet(t)}catch(e2){}}}render();if(/debug/.test(location.search)){const d=document.createElement("div");d.style.cssText="text-align:center;padding:8px;color:#fff;background:#222;font-size:14px";d.textContent=st||"SHEET_URL فارغ";document.body.prepend(d)}}
 init();
 </script>
 </body>

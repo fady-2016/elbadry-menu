@@ -285,7 +285,7 @@ function sendOrder() {
   msg += `${line}\n📦 عدد الأصناف: ${count}\n💰 *الإجمالي: ${total} ج.م*\n${line}\n`;
   msg += orderMode === "in"
     ? `🍽️ *داخل المحل*\n🪑 رقم الطاولة: ${val("tb")}\n`
-    : `🛵 *توصيل للمنزل*\n👤 الاسم: ${val("nm")}\n📞 الموبايل: ${val("ph")}\n📍 العنوان: ${val("ad")}\n${geo ? "🗺️ الموقع على الخريطة: https://www.google.com/maps?q=" + geo.lat + "," + geo.lng + "\n" : ""}(لم يشمل السعر رسوم التوصيل)\n`;
+    : `🛵 *توصيل للمنزل*\n👤 الاسم: ${val("nm")}\n📞 الموبايل: ${val("ph")}\n📍 العنوان: ${val("ad")}\n${geo ? "🧭 تحديد المسار للعميل: https://www.google.com/maps/dir/?api=1&destination=" + geo.lat + "," + geo.lng + "&travelmode=driving\n" : ""}(لم يشمل السعر رسوم التوصيل)\n`;
   if (val("nt")) msg += `📝 ملاحظات: ${val("nt")}\n`;
   window.open("https://wa.me/" + CONFIG.phone + "?text=" + encodeURIComponent(msg), "_blank");
 }

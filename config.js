@@ -9,7 +9,10 @@ const CONFIG = {
   phone: "201114642261",
 
   // رابط موقع المحل على خرائط جوجل (افتح المحل على Google Maps ← مشاركة ← نسخ الرابط). اتركه فارغًا لإخفاء الزر
-  shopMapUrl: "",
+  shopMapUrl: "https://www.google.com/maps/search/?api=1&query=31.4463393,31.6819026",
+
+  // إحداثيات المحل: يبدأ منها المسار في رسالة التوصيل (اتركها null ليبدأ المسار من موقع من يفتح الرابط)
+  shopLocation: { lat: 31.4463393, lng: 31.6819026 },
 
   // رابط الـ CSV المنشور من جوجل شيت (لو تُرك فارغًا تُستخدم data.js)
   sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBKX8xqrwamDQhNa1T-wXsvGQGqP4hCoqCqMyXGNXhDYbje6cQFkBxWSxH9DSGH88_ibrS2xZLG_DR/pub?gid=10679720&single=true&output=csv",

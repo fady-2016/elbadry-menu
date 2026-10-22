@@ -62,6 +62,13 @@ function parseCsv(text) {
   return rows;
 }
 
+// عمود "صورة" في الشيت: رابط كامل (https://...) أو اسم ملف فقط من مجلد images (مثل mango.jpg)
+function imageSource(value) {
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  return "images/" + encodeURI(value.replace(/^\/?images\//i, ""));
+}
+
 // تحويل صفوف الشيت إلى أقسام وأصناف
 function loadFromCsv(text) {
   const rows = parseCsv(text);
@@ -82,7 +89,7 @@ function loadFromCsv(text) {
       unit: /كجم|كيلو|kg/i.test(get(cUnit)) ? "kg" : "piece",
       soldOut: /^(لا|no|false|0|غير متاح)$/i.test(avail),
       isNew: /^(نعم|جديد|new|yes)$/i.test(get(cNew)),
-      image: /^https?:\/\//.test(get(cImg)) ? get(cImg) : ""
+      image: imageSource(get(cImg))
     };
     if (!groups.has(section)) groups.set(section, []);
     groups.get(section).push(item);
@@ -116,11 +123,15 @@ async function loadMenu() {
 /* ---------- 3) عرض الأقسام والأصناف ---------- */
 // اختيار صورة الصنف: رابط الشيت ← قواعد config.js ← أيقونة بديلة
 function itemImage(item) {
-  if (item.image) return `<img src="${item.image}" loading="lazy" alt="${item.name}">`;
   const rule = CONFIG.imageRules.find(r => r.section === item.section && (!r.match || r.match.test(item.name)));
-  if (rule) return `<img src="${CONFIG.images[rule.image]}" loading="lazy" alt="${item.name}">`;
+  const fallback = rule ? CONFIG.images[rule.image] : "";            // صورة القسم
   const emoji = /كرواسون|بريوش/.test(item.name) ? "🥐" : /دونات/.test(item.name) ? "🍩" : "🥮";
-  return `<div class="ph">${emoji}</div>`;
+  const placeholder = `<div class=ph>${emoji}</div>`;
+  const src = item.image || fallback;                                // صورة الصنف أولًا ثم صورة القسم
+  if (!src) return placeholder;
+  // لو الصورة غير موجودة أو الاسم خطأ: تظهر صورة القسم، وإلا الأيقونة
+  const onerror = fallback && src !== fallback ? `this.onerror=null;this.src='${fallback}'` : `this.outerHTML='${placeholder}'`;
+  return `<img src="${src}" loading="lazy" alt="${item.name}" onerror="${onerror}">`;
 }
 
 function renderTabs() {

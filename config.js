@@ -14,7 +14,7 @@ const CONFIG = {
   // location = إحداثيات الفرع لتحديد مسار التوصيل منه (اختياري)، مثل { lat: 31.44, lng: 31.68 }
   // mapUrl = رابط الفرع على خرائط جوجل (يظهر زر "الموقع على الخريطة" في قائمة فروعنا)
   branches: [
-    { name: "فرع دمياط", address: "دمياط - كورنيش النيل بجوار المعهد الأزهري", phone: "", orders: true,
+    { name: "فرع دمياط", address: "دمياط - كورنيش النيل بجوار المعهد الأزهري", phone: "201143218259", orders: true,
       location: { lat: 31.4266376, lng: 31.8042813 }, mapUrl: "https://www.google.com/maps/search/?api=1&query=31.4266376,31.8042813" },
     { name: "فرع دمياط الجديدة", address: "دمياط الجديدة - شارع البشبيشي", phone: "", orders: true,
       location: { lat: 31.4463393, lng: 31.6819026 }, mapUrl: "https://www.google.com/maps/search/?api=1&query=31.4463393,31.6819026" },

@@ -400,3 +400,54 @@ h2 {
   text-decoration:none;
   border-bottom:1px dashed var(--gold);
 }
+
+/* ===== 8) الفروع (قائمة فروعنا واختيار الفرع في السلة) ===== */
+.branchbtn {
+  display:block;
+  margin:10px auto 0;
+  padding:8px 18px;
+  border-radius:20px;
+  border:1px solid var(--gold);
+  background:transparent;
+  color:var(--gold);
+  font-size:14px;
+  cursor:pointer;
+}
+.blabel {
+  color:var(--gold);
+  font-weight:bold;
+  margin:10px 0 6px;
+}
+.branches {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:12px;
+}
+.branch {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid #ffffff30;
+  background:var(--bg);
+  font-size:14px;
+  cursor:pointer;
+}
+.branch.on {
+  border-color:var(--gold);
+  background:#7a2149;
+}
+.branch b {
+  color:var(--gold);
+}
+.branch span, .branch a {
+  color:var(--tx);
+  font-size:13px;
+  text-decoration:none;
+}
+.sheet > .branch {
+  margin-bottom:8px;
+  cursor:default;
+}

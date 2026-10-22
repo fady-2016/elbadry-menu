@@ -11,6 +11,7 @@ const cart = {};       // {id: الكمية}
 let orderMode = "in";  // in = داخل المحل ، out = توصيل
 let searchTerm = "";
 let picker = null;     // الصنف المفتوح في نافذة الكمية {id, qty}
+let branchIndex = -1;  // الفرع المختار للطلب (-1 = لم يُختر بعد)
 let geo = null;       // موقع الزبون {lat, lng, acc} بعد الضغط على زر تحديد الموقع
 let sourceStatus = ""; // حالة التحميل (تظهر مع ?debug)
 
@@ -212,7 +213,10 @@ function updateCartBar() {
   $("ft").textContent = fmt(total) + " ج.م";
 }
 
-function refreshCartIfOpen() { if ($("ov").classList.contains("show")) openCart(); }
+function refreshCartIfOpen() {
+  if (!$("ov").classList.contains("show")) return;
+  const saved = formValues(); openCart(); restoreForm(saved);   // يحفظ ما كتبه الزبون أثناء تحديث السلة
+}
 function closeCart() { $("ov").classList.remove("show"); }
 
 function openCart() {
@@ -232,6 +236,7 @@ function openCart() {
   $("sh").innerHTML = `
     <h3>🛒 سلة المشتريات<button onclick="closeCart()">×</button></h3>${rows}
     <div class="tot"><span>الإجمالي</span><span>${fmt(total)} ج.م</span></div>
+    ${branchPicker()}
     <div class="mode">
       <button class="${orderMode === "in" ? "on" : ""}" onclick="setMode('in')">🍽️ داخل المحل</button>
       <button class="${orderMode === "out" ? "on" : ""}" onclick="setMode('out')">🛵 توصيل للمنزل</button>
@@ -265,13 +270,50 @@ function getLocation() {
 }
 
 function setMode(mode) {
-  const notes = $("nt") ? $("nt").value : "";
-  orderMode = mode; openCart(); $("nt").value = notes;
+  const saved = formValues();
+  orderMode = mode; openCart(); restoreForm(saved);
+}
+
+/* ---------- الفروع ---------- */
+const FORM_IDS = ["tb", "nm", "ph", "ad", "nt"];
+function formValues() { const v = {}; FORM_IDS.forEach(id => { if ($(id)) v[id] = $(id).value; }); return v; }
+function restoreForm(v) { FORM_IDS.forEach(id => { if ($(id) && v[id] !== undefined) $(id).value = v[id]; }); }
+
+const orderableBranches = () => (CONFIG.branches || []).map((b, i) => ({ b, i })).filter(x => x.b.orders !== false);
+const phoneShow = p => p ? (p.startsWith("20") ? "0" + p.slice(2) : p) : "";
+
+function branchInfo(b) {                       // العنوان والرقم داخل كارت الفرع
+  const phone = phoneShow(b.phone);
+  return `<span>📍 ${b.address}</span>` + (phone ? `<span dir="ltr">📞 ${phone}</span>` : "");
+}
+
+function branchPicker() {                      // اختيار الفرع داخل السلة
+  const list = orderableBranches();
+  if (!list.length) return "";
+  if (list.length === 1) branchIndex = list[0].i;
+  return `<div class="blabel">🏪 اختر الفرع</div><div class="branches">` +
+    list.map(({ b, i }) => `<div class="branch${branchIndex === i ? " on" : ""}" onclick="setBranch(${i})"><b>${b.name}</b>${branchInfo(b)}</div>`).join("") + `</div>`;
+}
+
+function setBranch(i) { const saved = formValues(); branchIndex = i; openCart(); restoreForm(saved); }
+
+function openBranches() {                      // نافذة "فروعنا" (كل الفروع بأرقامها)
+  $("sh").innerHTML = `<h3>📍 فروعنا<button onclick="closeCart()">×</button></h3>` + (CONFIG.branches || []).map(b => {
+    const phone = phoneShow(b.phone);
+    const call = phone ? `<a dir="ltr" href="tel:+${b.phone}">📞 ${phone}</a>` : "";
+    const mapUrl = b.mapUrl || (b.location ? `https://www.google.com/maps/search/?api=1&query=${b.location.lat},${b.location.lng}` : "");
+    const map = mapUrl ? `<a href="${mapUrl}" target="_blank">🗺️ الموقع على الخريطة</a>` : "";
+    return `<div class="branch"><b>${b.name}</b><span>📍 ${b.address}</span>${call}${map}</div>`;
+  }).join("");
+  $("ov").classList.add("show");
 }
 
 /* ---------- 6) إرسال الطلب إلى واتساب ---------- */
 function sendOrder() {
   const val = id => $(id) ? $(id).value.trim() : "";
+  if (orderableBranches().length && branchIndex < 0) { alert("من فضلك اختر الفرع"); return; }
+  const branch = (CONFIG.branches || [])[branchIndex] || {};
+  const origin = branch.location || CONFIG.shopLocation;       // بداية المسار: الفرع المختار
   if (orderMode === "in" && !val("tb")) { alert("من فضلك اكتب رقم الطاولة"); return; }
   if (orderMode === "out" && (!val("nm") || !val("ph") || !val("ad"))) { alert("من فضلك اكتب الاسم ورقم الموبايل والعنوان"); return; }
 
@@ -283,11 +325,12 @@ function sendOrder() {
     msg += `${i + 1}) *${item.name}* (${item.section})\n    الكمية: ${isKg(item) ? q + " كجم" : q}\n    ${q} × ${item.price} = *${lineTotal(item, q)}* ج.م\n`;
   });
   msg += `${line}\n📦 عدد الأصناف: ${count}\n💰 *الإجمالي: ${total} ج.م*\n${line}\n`;
+  if (branch.name) msg += `🏪 *الفرع: ${branch.name}*\n📍 ${branch.address}\n${line}\n`;
   msg += orderMode === "in"
     ? `🍽️ *داخل المحل*\n🪑 رقم الطاولة: ${val("tb")}\n`
-    : `🛵 *توصيل للمنزل*\n👤 الاسم: ${val("nm")}\n📞 الموبايل: ${val("ph")}\n📍 العنوان: ${val("ad")}\n${geo ? "🧭 تحديد المسار للعميل: https://www.google.com/maps/dir/?api=1&destination=" + geo.lat + "," + geo.lng + (CONFIG.shopLocation ? "&origin=" + CONFIG.shopLocation.lat + "," + CONFIG.shopLocation.lng : "") + "&travelmode=driving\n" : ""}(لم يشمل السعر رسوم التوصيل)\n`;
+    : `🛵 *توصيل للمنزل*\n👤 الاسم: ${val("nm")}\n📞 الموبايل: ${val("ph")}\n📍 العنوان: ${val("ad")}\n${geo ? "🧭 تحديد المسار للعميل: https://www.google.com/maps/dir/?api=1&destination=" + geo.lat + "," + geo.lng + (origin ? "&origin=" + origin.lat + "," + origin.lng : "") + "&travelmode=driving\n" : ""}(لم يشمل السعر رسوم التوصيل)\n`;
   if (val("nt")) msg += `📝 ملاحظات: ${val("nt")}\n`;
-  window.open("https://wa.me/" + CONFIG.phone + "?text=" + encodeURIComponent(msg), "_blank");
+  window.open("https://wa.me/" + (branch.phone || CONFIG.phone) + "?text=" + encodeURIComponent(msg), "_blank");
 }
 
 /* ---------- 7) التشغيل ---------- */
@@ -296,6 +339,11 @@ async function start() {
   document.title = CONFIG.shopName;
   $("q").addEventListener("input", e => { searchTerm = e.target.value; renderMenu(); });
   $("pv").addEventListener("click", e => { if (e.target.id === "pv") closePicker(); });
+  if ((CONFIG.branches || []).length) {         // زر فروعنا في الهيدر
+    const btn = document.createElement("button");
+    btn.className = "branchbtn"; btn.textContent = "📍 فروعنا وأرقام التواصل"; btn.onclick = openBranches;
+    document.querySelector("header").appendChild(btn);
+  }
   if (CONFIG.shopMapUrl) {                      // رابط موقع المحل في الهيدر (اختياري)
     const link = document.createElement("a");
     link.className = "shopmap"; link.href = CONFIG.shopMapUrl; link.target = "_blank";

@@ -8,11 +8,25 @@ const CONFIG = {
   // رقم واتساب الكاشير بالصيغة الدولية بدون صفرين في أوله
   phone: "201114642261",
 
+  // الفروع. phone = رقم الفرع بالصيغة الدولية بدون صفرين (مثل 201012345678)،
+  // وإليه يُرسل الطلب. لو تُرك فارغًا يُرسل الطلب إلى الرقم الرئيسي phone أعلاه.
+  // orders:false = يظهر في قائمة الفروع فقط ولا يمكن اختياره عند الطلب.
+  // location = إحداثيات الفرع لتحديد مسار التوصيل منه (اختياري)، مثل { lat: 31.44, lng: 31.68 }
+  // mapUrl = رابط الفرع على خرائط جوجل (يظهر زر "الموقع على الخريطة" في قائمة فروعنا)
+  branches: [
+    { name: "فرع دمياط", address: "دمياط - كورنيش النيل بجوار المعهد الأزهري", phone: "", orders: true,
+      location: { lat: 31.4266376, lng: 31.8042813 }, mapUrl: "https://www.google.com/maps/search/?api=1&query=31.4266376,31.8042813" },
+    { name: "فرع دمياط الجديدة", address: "دمياط الجديدة - شارع البشبيشي", phone: "", orders: true,
+      location: { lat: 31.4463393, lng: 31.6819026 }, mapUrl: "https://www.google.com/maps/search/?api=1&query=31.4463393,31.6819026" },
+    { name: "المصنع", address: "طريق بورسعيد - أول تقسيم أبو زيد - بجوار مسجد السلام", phone: "", orders: false,
+      location: null, mapUrl: "https://www.google.com/maps/search/?api=1&query=%D8%B7%D8%B1%D9%8A%D9%82%20%D8%A8%D9%88%D8%B1%D8%B3%D8%B9%D9%8A%D8%AF%20-%20%D8%A7%D9%88%D9%84%20%D8%AA%D9%82%D8%B3%D9%8A%D9%85%20%D8%A7%D8%A8%D9%88%20%D8%B2%D9%8A%D8%AF%20-%20%D8%A8%D8%AC%D9%88%D8%A7%D8%B1%20%D9%85%D8%B3%D8%AC%D8%AF%20%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85" }
+  ],
+
   // رابط موقع المحل على خرائط جوجل (افتح المحل على Google Maps ← مشاركة ← نسخ الرابط). اتركه فارغًا لإخفاء الزر
-  shopMapUrl: "https://www.google.com/maps/search/?api=1&query=31.4463393,31.6819026",
+  shopMapUrl: "",
 
   // إحداثيات المحل: يبدأ منها المسار في رسالة التوصيل (اتركها null ليبدأ المسار من موقع من يفتح الرابط)
-  shopLocation: { lat: 31.4463393, lng: 31.6819026 },
+  shopLocation: null,
 
   // رابط الـ CSV المنشور من جوجل شيت (لو تُرك فارغًا تُستخدم data.js)
   sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTBKX8xqrwamDQhNa1T-wXsvGQGqP4hCoqCqMyXGNXhDYbje6cQFkBxWSxH9DSGH88_ibrS2xZLG_DR/pub?gid=10679720&single=true&output=csv",
